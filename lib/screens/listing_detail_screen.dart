@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 import 'package:kigali_city_service_places/models/listing.dart';
+import 'package:kigali_city_service_places/models/review.dart';
 import 'package:kigali_city_service_places/state/listing_provider.dart';
 import 'package:kigali_city_service_places/state/review_provider.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -20,6 +21,11 @@ class ListingDetailScreen extends StatelessWidget {
     final bool isBookmarked = listingProvider.isBookmarked(listing.id);
     final bool isOwner = listing.createdBy == listingProvider.currentUserId;
     final LatLng point = LatLng(listing.latitude, listing.longitude);
+
+    final ReviewProvider reviewProvider = context.watch<ReviewProvider>();
+    final List<Review> reviews = reviewProvider.reviews
+        .where((Review r) => r.listingId == listing.id)
+        .toList();
 
     return Scaffold(
       appBar: AppBar(
@@ -153,6 +159,29 @@ class ListingDetailScreen extends StatelessWidget {
             icon: const Icon(Icons.navigation_outlined),
             label: const Text('Navigate with Google Maps'),
           ),
+          const SizedBox(height: 24),
+          const Divider(),
+          const SizedBox(height: 16),
+          Text(
+            'Reviews (${reviews.length})',
+            style: Theme.of(
+              context,
+            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 16),
+          if (reviews.isEmpty)
+            const Center(
+              child: Padding(
+                padding: EdgeInsets.all(16.0),
+                child: Text(
+                  'No reviews yet. Be the first to share your experience!',
+                  style: TextStyle(color: Colors.grey),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            )
+          else
+            ...reviews.map((Review review) => _ReviewItem(review: review)),
         ],
       ),
     );
@@ -354,6 +383,66 @@ class _RatingDialogState extends State<_RatingDialog> {
               : const Text('Submit'),
         ),
       ],
+    );
+  }
+}
+
+class _ReviewItem extends StatelessWidget {
+  const _ReviewItem({required this.review});
+
+  final Review review;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      margin: const EdgeInsets.only(bottom: 12),
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Row(
+              children: <Widget>[
+                CircleAvatar(
+                  radius: 16,
+                  backgroundColor: Theme.of(
+                    context,
+                  ).primaryColor.withValues(alpha: 0.1),
+                  child: Text(
+                    review.createdByName.isNotEmpty
+                        ? review.createdByName[0].toUpperCase()
+                        : '?',
+                    style: TextStyle(
+                      color: Theme.of(context).primaryColor,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    review.createdByName,
+                    style: const TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                ),
+                Icon(Icons.star_rounded, color: Colors.amber[700], size: 16),
+                const SizedBox(width: 4),
+                Text(
+                  review.rating.toString(),
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Text(review.comment),
+            const SizedBox(height: 8),
+            Text(
+              DateFormat('MMM d, yyyy').format(review.timestamp),
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

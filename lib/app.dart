@@ -1,4 +1,3 @@
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -7,9 +6,6 @@ import 'package:kigali_city_service_places/repositories/auth_repository.dart';
 import 'package:kigali_city_service_places/repositories/listing_repository.dart';
 import 'package:kigali_city_service_places/repositories/review_repository.dart';
 import 'package:kigali_city_service_places/screens/auth/auth_gate.dart';
-import 'package:kigali_city_service_places/services/firebase/firebase_auth_service.dart';
-import 'package:kigali_city_service_places/services/firebase/firebase_listing_service.dart';
-import 'package:kigali_city_service_places/services/firebase/firebase_review_service.dart';
 import 'package:kigali_city_service_places/services/mock/mock_auth_service.dart';
 import 'package:kigali_city_service_places/services/mock/mock_listing_service.dart';
 import 'package:kigali_city_service_places/services/mock/mock_review_service.dart';

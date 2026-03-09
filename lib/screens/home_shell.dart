@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 
 import 'package:kigali_city_service_places/screens/directory_screen.dart';
-import 'package:kigali_city_service_places/screens/bookings_screen.dart';
 import 'package:kigali_city_service_places/screens/bookmarks_screen.dart';
 import 'package:kigali_city_service_places/screens/listing_form_screen.dart';
 import 'package:kigali_city_service_places/screens/map_view_screen.dart';
-import 'package:kigali_city_service_places/screens/review_screen.dart';
+import 'package:kigali_city_service_places/screens/my_listings_screen.dart';
 import 'package:kigali_city_service_places/screens/settings_screen.dart';
 
 class HomeShell extends StatefulWidget {
@@ -20,9 +19,8 @@ class _HomeShellState extends State<HomeShell> {
 
   static const List<String> _titles = <String>[
     'Home',
-    'Bookmark',
-    'Bookings',
-    'Review',
+    'Saved Places',
+    'My Listings',
     'Map View',
     'Settings',
   ];
@@ -32,8 +30,7 @@ class _HomeShellState extends State<HomeShell> {
     final List<Widget> pages = <Widget>[
       const DirectoryScreen(),
       const BookmarksScreen(),
-      const BookingsScreen(),
-      const ReviewScreen(),
+      const MyListingsScreen(),
       const MapViewScreen(),
       const SettingsScreen(),
     ];
@@ -65,20 +62,13 @@ class _HomeShellState extends State<HomeShell> {
           NavigationDestination(icon: Icon(Icons.home_outlined), label: 'Home'),
           NavigationDestination(
             icon: Icon(Icons.bookmark_outline),
-            label: 'Bookmark',
+            label: 'Saved',
           ),
           NavigationDestination(
-            icon: Icon(Icons.calendar_month_outlined),
-            label: 'Bookings',
+            icon: Icon(Icons.list_alt_outlined),
+            label: 'My Listings',
           ),
-          NavigationDestination(
-            icon: Icon(Icons.reviews_outlined),
-            label: 'Review',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.map_outlined),
-            label: 'Map View',
-          ),
+          NavigationDestination(icon: Icon(Icons.map_outlined), label: 'Map'),
           NavigationDestination(
             icon: Icon(Icons.settings_outlined),
             label: 'Settings',
