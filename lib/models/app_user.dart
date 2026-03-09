@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 class AppUser {
   const AppUser({
     required this.uid,
@@ -45,13 +47,22 @@ class AppUser {
   }
 
   factory AppUser.fromJson(Map<String, dynamic> json) {
+    DateTime createdAt;
+    if (json['createdAt'] is String) {
+      createdAt = DateTime.parse(json['createdAt'] as String);
+    } else if (json['createdAt'] is Timestamp) {
+      createdAt = (json['createdAt'] as Timestamp).toDate();
+    } else {
+      createdAt = DateTime.now();
+    }
+
     return AppUser(
       uid: json['uid'] as String,
       email: json['email'] as String,
       displayName: json['displayName'] as String,
       emailVerified: json['emailVerified'] as bool,
       notificationsEnabled: json['notificationsEnabled'] as bool,
-      createdAt: DateTime.parse(json['createdAt'] as String),
+      createdAt: createdAt,
     );
   }
 }

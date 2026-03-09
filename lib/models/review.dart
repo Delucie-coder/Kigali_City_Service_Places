@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 class Review {
   const Review({
     required this.id,
@@ -11,6 +13,15 @@ class Review {
   });
 
   factory Review.fromJson(Map<String, dynamic> json) {
+    DateTime timestamp;
+    if (json['timestamp'] is String) {
+      timestamp = DateTime.parse(json['timestamp'] as String);
+    } else if (json['timestamp'] is Timestamp) {
+      timestamp = (json['timestamp'] as Timestamp).toDate();
+    } else {
+      timestamp = DateTime.now();
+    }
+
     return Review(
       id: json['id'] as String,
       listingId: json['listingId'] as String,
@@ -19,7 +30,7 @@ class Review {
       comment: json['comment'] as String,
       createdBy: json['createdBy'] as String,
       createdByName: json['createdByName'] as String,
-      timestamp: DateTime.parse(json['timestamp'] as String),
+      timestamp: timestamp,
     );
   }
 

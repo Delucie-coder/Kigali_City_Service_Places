@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 class Listing {
   const Listing({
     required this.id,
@@ -75,6 +77,16 @@ class Listing {
   }
 
   factory Listing.fromJson(Map<String, dynamic> json) {
+    DateTime timestamp;
+    if (json['timestamp'] is String) {
+      timestamp = DateTime.parse(json['timestamp'] as String);
+    } else if (json['timestamp'] is Timestamp) {
+      // Handle Firestore Timestamp
+      timestamp = (json['timestamp'] as Timestamp).toDate();
+    } else {
+      timestamp = DateTime.now(); // Fallback
+    }
+
     return Listing(
       id: json['id'] as String,
       name: json['name'] as String,
@@ -85,7 +97,7 @@ class Listing {
       latitude: (json['latitude'] as num).toDouble(),
       longitude: (json['longitude'] as num).toDouble(),
       createdBy: json['createdBy'] as String,
-      timestamp: DateTime.parse(json['timestamp'] as String),
+      timestamp: timestamp,
       rating: (json['rating'] as num).toDouble(),
       imageUrl: json['imageUrl'] as String?,
     );
