@@ -33,21 +33,12 @@ class _KigaliDirectoryAppState extends State<KigaliDirectoryApp> {
   @override
   void initState() {
     super.initState();
-    if (Firebase.apps.isNotEmpty) {
-      _authRepository = AuthRepository(authService: FirebaseAuthService());
-      _listingRepository = ListingRepository(
-        listingService: FirebaseListingService(),
-      );
-      _reviewRepository = ReviewRepository(
-        reviewService: FirebaseReviewService(),
-      );
-    } else {
-      _authRepository = AuthRepository(authService: MockAuthService());
-      _listingRepository = ListingRepository(
-        listingService: MockListingService(),
-      );
-      _reviewRepository = ReviewRepository(reviewService: MockReviewService());
-    }
+    // Force use of Mock services for now since Firebase is not fully configured
+    _authRepository = AuthRepository(authService: MockAuthService());
+    _listingRepository = ListingRepository(
+      listingService: MockListingService(),
+    );
+    _reviewRepository = ReviewRepository(reviewService: MockReviewService());
   }
 
   @override
