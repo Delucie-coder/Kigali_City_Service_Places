@@ -56,4 +56,38 @@ class Listing {
       imageUrl: imageUrl ?? this.imageUrl,
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'category': category,
+      'address': address,
+      'contactNumber': contactNumber,
+      'description': description,
+      'latitude': latitude,
+      'longitude': longitude,
+      'createdBy': createdBy,
+      'timestamp': timestamp.toIso8601String(),
+      'rating': rating,
+      'imageUrl': imageUrl,
+    };
+  }
+
+  factory Listing.fromJson(Map<String, dynamic> json) {
+    return Listing(
+      id: json['id'] as String,
+      name: json['name'] as String,
+      category: json['category'] as String,
+      address: json['address'] as String,
+      contactNumber: json['contactNumber'] as String,
+      description: json['description'] as String,
+      latitude: (json['latitude'] as num).toDouble(),
+      longitude: (json['longitude'] as num).toDouble(),
+      createdBy: json['createdBy'] as String,
+      timestamp: DateTime.parse(json['timestamp'] as String),
+      rating: (json['rating'] as num).toDouble(),
+      imageUrl: json['imageUrl'] as String?,
+    );
+  }
 }

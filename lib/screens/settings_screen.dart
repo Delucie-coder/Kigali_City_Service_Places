@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'package:kigali_city_service_places/state/auth_provider.dart';
+import 'package:kigali_city_service_places/state/theme_provider.dart';
+import 'package:kigali_city_service_places/screens/my_listings_screen.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -44,6 +46,19 @@ class SettingsScreen extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 12),
+        ListTile(
+          contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+          title: const Text('Dark Mode'),
+          leading: const Icon(Icons.dark_mode_outlined),
+          trailing: Switch.adaptive(
+            value: context.watch<ThemeProvider>().themeMode == ThemeMode.dark,
+            onChanged: (bool value) {
+              context.read<ThemeProvider>().setThemeMode(
+                value ? ThemeMode.dark : ThemeMode.light,
+              );
+            },
+          ),
+        ),
         SwitchListTile.adaptive(
           contentPadding: const EdgeInsets.symmetric(horizontal: 8),
           title: const Text('Location-based notifications'),
@@ -55,7 +70,20 @@ class SettingsScreen extends StatelessWidget {
             context.read<AuthProvider>().setNotificationPreference(value);
           },
         ),
-        const SizedBox(height: 8),
+        const Divider(),
+        ListTile(
+          contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+          title: const Text('My Created Listings'),
+          subtitle: const Text('Manage places you have added'),
+          leading: const Icon(Icons.list_alt),
+          trailing: const Icon(Icons.chevron_right),
+          onTap: () {
+            Navigator.of(context).push(
+              MaterialPageRoute<void>(builder: (_) => const MyListingsScreen()),
+            );
+          },
+        ),
+        const SizedBox(height: 16),
         FilledButton.tonalIcon(
           onPressed: authProvider.isLoading
               ? null

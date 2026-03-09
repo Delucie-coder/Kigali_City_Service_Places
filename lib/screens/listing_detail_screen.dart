@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 import 'package:kigali_city_service_places/models/listing.dart';
+import 'package:kigali_city_service_places/state/listing_provider.dart';
 import 'package:kigali_city_service_places/state/review_provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -15,10 +16,42 @@ class ListingDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final ListingProvider listingProvider = context.watch<ListingProvider>();
+    final bool isBookmarked = listingProvider.isBookmarked(listing.id);
+    final bool isOwner = listing.createdBy == listingProvider.currentUserId;
     final LatLng point = LatLng(listing.latitude, listing.longitude);
 
     return Scaffold(
-      appBar: AppBar(title: Text(listing.name)),
+      appBar: AppBar(
+        title: Text(listing.name),
+        actions: <Widget>[
+          IconButton(
+            onPressed: () {
+              listingProvider.toggleBookmark(listing.id);
+              ScaffoldMessenger.of(context).hideCurrentSnackBar();
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    isBookmarked
+                        ? 'Removed from bookmarks'
+                        : 'Added to bookmarks',
+                  ),
+                ),
+              );
+            },
+            icon: Icon(
+              isBookmarked ? Icons.bookmark : Icons.bookmark_border,
+              color: isBookmarked ? Colors.amber[700] : null,
+            ),
+          ),
+          if (isOwner)
+            IconButton(
+              onPressed: () => _confirmDelete(context, listingProvider),
+              icon: const Icon(Icons.delete_outline),
+              tooltip: 'Delete Listing',
+            ),
+        ],
+      ),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: <Widget>[
@@ -123,6 +156,49 @@ class ListingDetailScreen extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  Future<void> _confirmDelete(
+    BuildContext context,
+    ListingProvider provider,
+  ) async {
+    final bool? confirm = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) => AlertDialog(
+        title: const Text('Delete Listing?'),
+        content: Text('Are you sure you want to delete "${listing.name}"?'),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm == true) {
+      if (!context.mounted) return;
+      await provider.deleteListing(listing.id);
+      if (!context.mounted) return;
+
+      if (provider.errorMessage != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(provider.errorMessage!),
+            backgroundColor: Colors.red,
+          ),
+        );
+      } else {
+        Navigator.of(context).pop(); // Close detail screen
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Listing deleted successfully')),
+        );
+      }
+    }
   }
 
   Future<void> _openDirections(BuildContext context) async {

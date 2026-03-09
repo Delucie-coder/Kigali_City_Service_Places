@@ -10,6 +10,7 @@ import 'package:kigali_city_service_places/services/mock/mock_listing_service.da
 import 'package:kigali_city_service_places/state/auth_provider.dart';
 import 'package:kigali_city_service_places/state/listing_provider.dart';
 import 'package:kigali_city_service_places/state/review_provider.dart';
+import 'package:kigali_city_service_places/state/theme_provider.dart';
 
 class KigaliDirectoryApp extends StatefulWidget {
   const KigaliDirectoryApp({super.key});
@@ -35,6 +36,7 @@ class _KigaliDirectoryAppState extends State<KigaliDirectoryApp> {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
+        ChangeNotifierProvider<ThemeProvider>(create: (_) => ThemeProvider()),
         ChangeNotifierProvider<AuthProvider>(
           create: (_) => AuthProvider(authRepository: _authRepository),
         ),
@@ -60,11 +62,17 @@ class _KigaliDirectoryAppState extends State<KigaliDirectoryApp> {
           },
         ),
       ],
-      child: MaterialApp(
-        title: 'Kigali City Directory',
-        debugShowCheckedModeBanner: false,
-        theme: AppTheme.light(),
-        home: const AuthGate(),
+      child: Consumer<ThemeProvider>(
+        builder: (context, themeProvider, _) {
+          return MaterialApp(
+            title: 'Kigali City Directory',
+            debugShowCheckedModeBanner: false,
+            themeMode: themeProvider.themeMode,
+            theme: AppTheme.light(),
+            darkTheme: AppTheme.dark(),
+            home: const AuthGate(),
+          );
+        },
       ),
     );
   }

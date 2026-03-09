@@ -76,6 +76,18 @@ class DirectoryScreen extends StatelessWidget {
                           ),
                         );
                       },
+                      trailing: IconButton(
+                        onPressed: () =>
+                            listingProvider.toggleBookmark(listing.id),
+                        icon: Icon(
+                          listingProvider.isBookmarked(listing.id)
+                              ? Icons.bookmark
+                              : Icons.bookmark_border,
+                          color: listingProvider.isBookmarked(listing.id)
+                              ? Colors.amber[700]
+                              : null,
+                        ),
+                      ),
                     );
                   },
                 ),

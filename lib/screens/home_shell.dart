@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 
 import 'package:kigali_city_service_places/screens/directory_screen.dart';
 import 'package:kigali_city_service_places/screens/bookings_screen.dart';
+import 'package:kigali_city_service_places/screens/bookmarks_screen.dart';
 import 'package:kigali_city_service_places/screens/listing_form_screen.dart';
 import 'package:kigali_city_service_places/screens/map_view_screen.dart';
-import 'package:kigali_city_service_places/screens/my_listings_screen.dart';
 import 'package:kigali_city_service_places/screens/review_screen.dart';
 import 'package:kigali_city_service_places/screens/settings_screen.dart';
 
@@ -31,7 +31,7 @@ class _HomeShellState extends State<HomeShell> {
   Widget build(BuildContext context) {
     final List<Widget> pages = <Widget>[
       const DirectoryScreen(),
-      const MyListingsScreen(),
+      const BookmarksScreen(),
       const BookingsScreen(),
       const ReviewScreen(),
       const MapViewScreen(),

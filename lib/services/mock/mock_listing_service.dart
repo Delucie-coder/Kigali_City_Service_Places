@@ -1,13 +1,14 @@
 import 'dart:async';
+import 'dart:convert';
 
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:kigali_city_service_places/models/listing.dart';
 import 'package:kigali_city_service_places/services/interfaces/listing_service.dart';
 import 'package:uuid/uuid.dart';
 
 class MockListingService implements ListingService {
   MockListingService() {
-    _seedDemoData();
-    _push();
+    _init();
   }
 
   final Uuid _uuid = const Uuid();
@@ -15,6 +16,45 @@ class MockListingService implements ListingService {
       StreamController<List<Listing>>.broadcast();
 
   final List<Listing> _listings = <Listing>[];
+  static const String _storageKey = 'kigali_listings_data';
+
+  Future<void> _init() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final String? data = prefs.getString(_storageKey);
+
+    if (data != null && data.isNotEmpty) {
+      try {
+        final List<dynamic> decoded = jsonDecode(data);
+        final List<Listing> loaded = decoded
+            .map((e) => Listing.fromJson(e as Map<String, dynamic>))
+            .toList();
+
+        // Ensure initial demo data is present if just installed on top of empty storage
+        if (loaded.isEmpty) {
+          _seedDemoData();
+          await _save();
+        } else {
+          _listings.addAll(loaded);
+        }
+      } catch (e) {
+        // Fallback if data is corrupted
+        _seedDemoData();
+        await _save();
+      }
+    } else {
+      _seedDemoData();
+      await _save();
+    }
+    _push();
+  }
+
+  Future<void> _save() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final String encoded = jsonEncode(
+      _listings.map((e) => e.toJson()).toList(),
+    );
+    await prefs.setString(_storageKey, encoded);
+  }
 
   @override
   Stream<List<Listing>> watchListings() async* {
@@ -28,6 +68,7 @@ class MockListingService implements ListingService {
     _listings.add(
       listing.copyWith(id: listing.id.isEmpty ? _uuid.v4() : listing.id),
     );
+    await _save();
     _push();
   }
 
@@ -49,6 +90,7 @@ class MockListingService implements ListingService {
     }
 
     _listings[index] = listing;
+    await _save();
     _push();
   }
 
@@ -70,6 +112,7 @@ class MockListingService implements ListingService {
     }
 
     _listings.removeAt(index);
+    await _save();
     _push();
   }
 
