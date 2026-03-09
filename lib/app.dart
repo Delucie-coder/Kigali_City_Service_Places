@@ -4,9 +4,11 @@ import 'package:provider/provider.dart';
 import 'package:kigali_city_service_places/core/theme/app_theme.dart';
 import 'package:kigali_city_service_places/repositories/auth_repository.dart';
 import 'package:kigali_city_service_places/repositories/listing_repository.dart';
+import 'package:kigali_city_service_places/repositories/review_repository.dart';
 import 'package:kigali_city_service_places/screens/auth/auth_gate.dart';
 import 'package:kigali_city_service_places/services/mock/mock_auth_service.dart';
 import 'package:kigali_city_service_places/services/mock/mock_listing_service.dart';
+import 'package:kigali_city_service_places/services/mock/mock_review_service.dart';
 import 'package:kigali_city_service_places/state/auth_provider.dart';
 import 'package:kigali_city_service_places/state/listing_provider.dart';
 import 'package:kigali_city_service_places/state/review_provider.dart';
@@ -22,6 +24,7 @@ class KigaliDirectoryApp extends StatefulWidget {
 class _KigaliDirectoryAppState extends State<KigaliDirectoryApp> {
   late final AuthRepository _authRepository;
   late final ListingRepository _listingRepository;
+  late final ReviewRepository _reviewRepository;
 
   @override
   void initState() {
@@ -30,6 +33,7 @@ class _KigaliDirectoryAppState extends State<KigaliDirectoryApp> {
     _listingRepository = ListingRepository(
       listingService: MockListingService(),
     );
+    _reviewRepository = ReviewRepository(reviewService: MockReviewService());
   }
 
   @override
@@ -51,9 +55,11 @@ class _KigaliDirectoryAppState extends State<KigaliDirectoryApp> {
           },
         ),
         ChangeNotifierProxyProvider<AuthProvider, ReviewProvider>(
-          create: (_) => ReviewProvider(),
+          create: (_) => ReviewProvider(reviewRepository: _reviewRepository),
           update: (_, AuthProvider auth, ReviewProvider? reviewProvider) {
-            final ReviewProvider provider = reviewProvider ?? ReviewProvider();
+            final ReviewProvider provider =
+                reviewProvider ??
+                ReviewProvider(reviewRepository: _reviewRepository);
             provider.bindUser(
               uid: auth.currentUser?.uid,
               displayName: auth.currentUser?.displayName,

@@ -1,9 +1,27 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:uuid/uuid.dart';
 
 import 'package:kigali_city_service_places/models/review.dart';
+import 'package:kigali_city_service_places/repositories/review_repository.dart';
 
 class ReviewProvider extends ChangeNotifier {
+  ReviewProvider({required ReviewRepository reviewRepository})
+    : _reviewRepository = reviewRepository {
+    _subscription = _reviewRepository.watchReviews().listen((
+      List<Review> data,
+    ) {
+      _reviews
+        ..clear()
+        ..addAll(data);
+      notifyListeners();
+    });
+  }
+
+  final ReviewRepository _reviewRepository;
+  StreamSubscription<List<Review>>? _subscription;
+
   final Uuid _uuid = const Uuid();
 
   final List<Review> _reviews = <Review>[];
@@ -21,6 +39,12 @@ class ReviewProvider extends ChangeNotifier {
     _currentUserId = uid;
     _currentUserName = displayName;
     notifyListeners();
+  }
+
+  @override
+  void dispose() {
+    _subscription?.cancel();
+    super.dispose();
   }
 
   Future<void> submitReview({
@@ -44,25 +68,39 @@ class ReviewProvider extends ChangeNotifier {
       return;
     }
 
+    // Check if user already reviewed this listing (optional, but good)
+    final bool alreadyReviewed = _reviews.any(
+      (Review r) => r.listingId == listingId && r.createdBy == _currentUserId,
+    );
+    if (alreadyReviewed) {
+      _setError('You have already reviewed this listing.');
+      return;
+    }
+
     _isSubmitting = true;
     _errorMessage = null;
     notifyListeners();
 
-    final Review review = Review(
-      id: _uuid.v4(),
-      listingId: listingId,
-      listingName: listingName,
-      rating: rating,
-      comment: comment.trim(),
-      createdBy: _currentUserId!,
-      createdByName: _currentUserName!,
-      timestamp: DateTime.now(),
-    );
+    try {
+      final Review review = Review(
+        id: _uuid.v4(),
+        listingId: listingId,
+        listingName: listingName,
+        rating: rating,
+        comment: comment.trim(),
+        createdBy: _currentUserId!,
+        createdByName: _currentUserName!,
+        timestamp: DateTime.now(),
+      );
 
-    _reviews.insert(0, review);
+      await _reviewRepository.submitReview(review);
 
-    _isSubmitting = false;
-    notifyListeners();
+      _isSubmitting = false;
+      notifyListeners();
+    } catch (e) {
+      _isSubmitting = false;
+      _setError('Failed to submit review: $e');
+    }
   }
 
   void clearError() {

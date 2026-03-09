@@ -8,7 +8,7 @@ plugins {
 android {
     namespace = "com.example.kigali_city_service_places"
     compileSdk = flutter.compileSdkVersion
-    ndkVersion = flutter.ndkVersion
+    ndkVersion = "28.2.13676358"
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
