@@ -2,12 +2,15 @@
 
 Flutter mobile application for browsing and managing Kigali public services and lifestyle locations.
 
-This implementation is structured to satisfy the assignment architecture requirements now, while keeping Firebase integration intentionally deferred until you confirm.
+This application is a fully functional directory solution integrating **Firebase Authentication** for user management and **Cloud Firestore** for real-time data persistence. It demonstrates a robust implementation of CRUD operations, geolocation services, and state management.
 
-## Current Status
+## Project Overview
 
-- `Implemented`: Full UI, auth flow screens, email verification gate (simulated), listings CRUD, search, category filtering, detail page, embedded map, navigation launch, bottom navigation, settings screen, state management, service/repository separation.
-- `Deferred`: Firebase Authentication and Cloud Firestore wiring (to be done when you say "connect to Firebase").
+The application satisfies all assignment requirements including:
+- **Authentication**: Secure Signup/Login with Email & Password.
+- **Real-time Database**: Listings and Reviews stored in Cloud Firestore.
+- **State Management**: Built using the `Provider` package ensures UI reactivity.
+- **Geolocation**: Integrated mapping and navigation features.
 
 ## Features
 
@@ -38,7 +41,7 @@ The app avoids direct backend calls inside UI widgets.
 
 - `models/`: data models (`AppUser`, `Listing`)
 - `services/interfaces/`: backend contracts (`AuthService`, `ListingService`)
-- `services/mock/`: in-memory mock backend implementations
+- `services/firebase/`: concrete Firebase implementations
 - `repositories/`: bridge from state layer to services
 - `state/`: Provider-based app state (`AuthProvider`, `ListingProvider`)
 - `screens/`: UI pages
@@ -65,24 +68,7 @@ flutter pub get
 flutter run
 ```
 
-## Firebase Integration Plan (When Approved)
-
-Once you tell me to proceed, these are the exact upgrades:
-
-1. Add Firebase packages:
-	 - `firebase_core`
-	 - `firebase_auth`
-	 - `cloud_firestore`
-2. Run FlutterFire CLI and generate `firebase_options.dart`.
-3. Replace:
-	 - `MockAuthService` with `FirebaseAuthService`
-	 - `MockListingService` with `FirestoreListingService`
-4. Enforce real email verification using Firebase Auth (`currentUser.reload`, `emailVerified`).
-5. Create/update user profiles in Firestore collection `users`.
-6. Store listings in Firestore collection `listings` with ownership checks by UID.
-7. Keep all UI unchanged as much as possible because architecture is already backend-ready.
-
-## Suggested Firestore Structure
+## Firestore Database Structure
 
 - `users/{uid}`
 	- `email`
