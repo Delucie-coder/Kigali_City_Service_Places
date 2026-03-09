@@ -1,5 +1,7 @@
-import 'package:flutter/material.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:flutter/material.dart' hide Icon;
+import 'package:flutter/material.dart' as material;
+import 'package:flutter_map/flutter_map.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:provider/provider.dart';
 
 import 'package:kigali_city_service_places/models/listing.dart';
@@ -18,7 +20,7 @@ class _MapViewScreenState extends State<MapViewScreen> {
 
   String? _selectedListingId;
   String? _lastCameraTargetKey;
-  GoogleMapController? _mapController;
+  final MapController _mapController = MapController();
   late final TextEditingController _searchController;
 
   @override
@@ -30,7 +32,7 @@ class _MapViewScreenState extends State<MapViewScreen> {
   @override
   void dispose() {
     _searchController.dispose();
-    _mapController?.dispose();
+    _mapController.dispose();
     super.dispose();
   }
 
@@ -52,18 +54,14 @@ class _MapViewScreenState extends State<MapViewScreen> {
     _lastCameraTargetKey = targetKey;
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted || _mapController == null) {
+      if (!mounted) {
         return;
       }
-
-      final CameraPosition cameraPosition = CameraPosition(
-        target: listing == null
+      _mapController.move(
+        listing == null
             ? _kigaliCenter
             : LatLng(listing.latitude, listing.longitude),
-        zoom: listing == null ? 12 : 14,
-      );
-      _mapController!.animateCamera(
-        CameraUpdate.newCameraPosition(cameraPosition),
+        listing == null ? 12 : 14,
       );
     });
   }
@@ -88,22 +86,6 @@ class _MapViewScreenState extends State<MapViewScreen> {
 
     _focusCameraOnListing(active);
 
-    final Set<Marker> markers = visibleListings
-        .map(
-          (Listing listing) => Marker(
-            markerId: MarkerId(listing.id),
-            position: LatLng(listing.latitude, listing.longitude),
-            infoWindow: InfoWindow(title: listing.name),
-            onTap: () {
-              setState(() {
-                _selectedListingId = listing.id;
-              });
-              _focusCameraOnListing(listing);
-            },
-          ),
-        )
-        .toSet();
-
     return Column(
       children: <Widget>[
         Padding(
@@ -113,69 +95,81 @@ class _MapViewScreenState extends State<MapViewScreen> {
             onChanged: listingProvider.setSearchQuery,
             decoration: InputDecoration(
               hintText: 'Search by name, category, or address',
-              prefixIcon: const Icon(Icons.search),
+              prefixIcon: const material.Icon(Icons.search),
               suffixIcon: listingProvider.searchQuery.isEmpty
                   ? null
                   : IconButton(
                       tooltip: 'Clear search',
                       onPressed: () {
                         listingProvider.setSearchQuery('');
+                        _searchController.clear();
                       },
-                      icon: const Icon(Icons.close),
+                      icon: const material.Icon(Icons.clear, size: 20),
                     ),
             ),
           ),
         ),
+        if (listingProvider.errorMessage != null)
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: Text(
+              listingProvider.errorMessage!,
+              style: const TextStyle(color: Colors.redAccent),
+            ),
+          ),
         Expanded(
-          child: GoogleMap(
-            initialCameraPosition: CameraPosition(
-              target: _kigaliCenter,
-              zoom: 12,
-            ),
-            markers: markers,
-            onMapCreated: (GoogleMapController controller) {
-              _mapController = controller;
-              _focusCameraOnListing(active);
-            },
-          ),
-        ),
-        Container(
-          width: double.infinity,
-          padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
-          color: Colors.white,
-          child: active == null
-              ? const Text(
-                  'No matching places found in Home listings. Try another search.',
-                )
-              : Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    Text(
-                      active.name,
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      active.address,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 8),
-                    FilledButton.tonal(
-                      onPressed: () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute<void>(
-                            builder: (_) =>
-                                ListingDetailScreen(listing: active),
+          child: FlutterMap(
+            mapController: _mapController,
+            options: MapOptions(initialCenter: _kigaliCenter, initialZoom: 12),
+            children: [
+              TileLayer(
+                urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                userAgentPackageName: 'com.example.app',
+              ),
+              MarkerLayer(
+                markers: visibleListings.map((listing) {
+                  final bool isSelected = _selectedListingId == listing.id;
+                  return Marker(
+                    point: LatLng(listing.latitude, listing.longitude),
+                    width: 60,
+                    height: 60,
+                    child: GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          _selectedListingId = listing.id;
+                        });
+                        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(listing.name),
+                            action: SnackBarAction(
+                              label: 'Details',
+                              onPressed: () {
+                                Navigator.of(context).push(
+                                  MaterialPageRoute<void>(
+                                    builder: (_) =>
+                                        ListingDetailScreen(listing: listing),
+                                  ),
+                                );
+                              },
+                            ),
+                            duration: const Duration(seconds: 4),
                           ),
                         );
                       },
-                      child: const Text('Open Details'),
+                      child: material.Icon(
+                        Icons.location_on,
+                        color: isSelected
+                            ? Colors.red
+                            : Colors.red.withAlpha((0.7 * 255).round()),
+                        size: isSelected ? 40 : 35,
+                      ),
                     ),
-                  ],
-                ),
+                  );
+                }).toList(),
+              ),
+            ],
+          ),
         ),
       ],
     );
