@@ -1,18 +1,31 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter/widgets.dart';
-import 'package:kigali_city_service_places/app.dart';
 import 'firebase_options.dart';
+import 'theme/app_theme.dart';
+import 'theme/theme_provider.dart';
+import 'views/auth_wrapper.dart';
 
-Future<void> main() async {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  try {
-    await Firebase.initializeApp(
-      options: DefaultFirebaseOptions.currentPlatform,
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  runApp(const ProviderScope(child: MyApp()));
+}
+
+class MyApp extends ConsumerWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final themeMode = ref.watch(themeModeProvider);
+    
+    return MaterialApp(
+      title: 'Kigali Directory',
+      debugShowCheckedModeBanner: false,
+      theme: AppTheme.lightTheme,
+      darkTheme: AppTheme.darkTheme,
+      themeMode: themeMode,
+      home: const AuthWrapper(),
     );
-  } catch (e) {
-    // If running on web without filling the options, this will fail.
-    // If running on Android without google-services.json, this might fail or build might fail.
-    debugPrint('Firebase initialization error: $e');
   }
-  runApp(const KigaliDirectoryApp());
 }

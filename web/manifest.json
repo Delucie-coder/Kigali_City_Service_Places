@@ -1,6 +1,6 @@
 {
-    "name": "kigali_city_service_places",
-    "short_name": "kigali_city_service_places",
+    "name": "local",
+    "short_name": "local",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
