@@ -1,4 +1,4 @@
-# Kigali Directory
+# Kigali City Services Places
 
 A Flutter mobile application for discovering and managing local businesses, services, and points of interest in Kigali, Rwanda.
 
@@ -31,13 +31,12 @@ A Flutter mobile application for discovering and managing local businesses, serv
 | State Management | Riverpod |
 | Maps | flutter_map (OpenStreetMap) |
 | Location Services | Geolocator |
-| QR Codes | qr_flutter |
 | Theming | Material Design 3 |
 
 ## 📁 Project Structure
 
 ```
-lib2/
+lib/
 ├── main.dart                 # App entry point
 ├── firebase_options.dart     # Firebase configuration
 ├── models/
@@ -49,7 +48,7 @@ lib2/
 ├── theme/
 │   ├── app_theme.dart        # Theme configuration
 │   └── theme_provider.dart   # Theme state management
-└── views/
+└── screens/
     ├── auth_wrapper.dart     # Auth state wrapper
     ├── login_screen.dart     # User login
     ├── signup_screen.dart    # User registration
@@ -78,7 +77,7 @@ lib2/
 1. Clone the repository:
    ```bash
    git clone <repository-url>
-   cd local
+   cd kigali
    ```
 
 2. Install dependencies:
